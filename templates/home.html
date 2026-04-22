@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - NewsHub{% endblock %}
+
+{% block content %}
+<div class="search-bar">
+    <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search news articles...">
+    </div>
+</div>
+
+<div class="categories">
+    <button class="category-btn active" data-category="all">All</button>
+    {% for category in categories %}
+    <button class="category-btn" data-category="{{ category.name|lower }}">{{ category.name }}</button>
+    {% endfor %}
+</div>
+
+<main class="main-content">
+    {% if view == 'bookmarks' %}
+    <h2 class="page-title">My Bookmarks</h2>
+    {% endif %}
+    
+    <div class="news-grid" id="newsGrid">
+    </div>
+
+    <div class="no-results" id="noResults" style="display: none;">
+        <span class="no-results-icon">📭</span>
+        <h2>No articles found</h2>
+        <p>Try adjusting your search or category filters</p>
+    </div>
+</main>
+
+<div class="modal" id="articleModal">
+    <div class="modal-content">
+        <button class="modal-close" id="closeModal">&times;</button>
+        <div class="modal-header">
+            <span class="modal-category" id="modalCategory">Category</span>
+            <button class="bookmark-btn" id="modalBookmarkBtn">
+                <span class="bookmark-icon">🔖</span>
+                <span id="bookmarkText">Bookmark</span>
+            </button>
+        </div>
+        <h1 class="modal-title" id="modalTitle">Article Title</h1>
+        <div class="modal-meta">
+            <span class="modal-author" id="modalAuthor">By Author</span>
+            <span class="modal-date" id="modalDate">Date</span>
+        </div>
+        <div class="modal-image" id="modalImage"></div>
+        <div class="modal-body" id="modalBody">
+        </div>
+    </div>
+</div>
+{% endblock %}

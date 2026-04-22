@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Newsletter - NewsHub{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <div class="create-newsletter-container">
+        <h2>Create Newsletter</h2>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form id="createNewsletterForm" class="create-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="newsletterTitle">Title <span class="required">*</span></label>
+                <input type="text" id="newsletterTitle" name="title" required placeholder="Enter newsletter title">
+            </div>
+            <div class="form-group">
+                <label for="newsletterSubject">Email Subject <span class="required">*</span></label>
+                <input type="text" id="newsletterSubject" name="subject" required placeholder="Enter email subject line">
+            </div>
+            <div class="form-group">
+                <label for="newsletterCategory">Category</label>
+                <select id="newsletterCategory" name="category">
+                    <option value="">Select category</option>
+                    {% for category in categories %}
+                    <option value="{{ category.name }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="newsletterArticles">Featured Articles (optional)</label>
+                <select id="newsletterArticles" name="article_ids" multiple size="5">
+                    {% for article in articles %}
+                    <option value="{{ article.id }}">{{ article.title }}</option>
+                    {% endfor %}
+                </select>
+                <small>Hold Ctrl/Cmd to select multiple articles</small>
+            </div>
+            <div class="form-group">
+                <label for="newsletterContent">Content <span class="required">*</span></label>
+                <textarea id="newsletterContent" name="content" rows="12" required placeholder="Write your newsletter content here..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Save Newsletter</button>
+                <a href="{% url 'my_newsletters' %}" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<style>
+.create-newsletter-container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.create-newsletter-container h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.messages {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.required {
+    color: #dc2626;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--surface);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 200px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.form-actions .submit-btn {
+    flex: 1;
+    padding: 0.875rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.form-actions .submit-btn:hover {
+    background: var(--primary-hover);
+}
+
+.form-actions .cancel-btn {
+    padding: 0.875rem 1.5rem;
+    background: var(--background);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-actions .cancel-btn:hover {
+    background: var(--border-color);
+}
+</style>
+
+<script>
+document.getElementById('createNewsletterForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const articleSelect = document.getElementById('newsletterArticles');
+    const selectedArticles = Array.from(articleSelect.selectedOptions).map(opt => opt.value);
+    
+    const newsletterData = {
+        title: document.getElementById('newsletterTitle').value,
+        subject: document.getElementById('newsletterSubject').value,
+        category: document.getElementById('newsletterCategory').value,
+        article_ids: selectedArticles,
+        content: document.getElementById('newsletterContent').value
+    };
+    
+    try {
+        const response = await fetch('/store_newsletter/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(newsletterData)
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            window.location.href = '/my_newsletters/';
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

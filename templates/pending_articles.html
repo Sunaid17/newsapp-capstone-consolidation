@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pending Articles - NewsHub{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <div class="page-header">
+        <h2 class="page-title">📋 Articles Pending Review</h2>
+        <p class="page-subtitle">Review and approve submitted articles</p>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="news-grid" id="newsGrid">
+        {% for article in articles %}
+        <article class="news-card pending-article" data-id="{{ article.id }}">
+            <div class="news-card-image" style="background-image: url('{{ article.image|default:'' }}')">
+                <span class="news-card-category">{{ article.category.name }}</span>
+                <span class="status-badge pending">Pending Review</span>
+            </div>
+            <div class="news-card-content">
+                <h3 class="news-card-title">{{ article.title }}</h3>
+                <p class="news-card-excerpt">{{ article.content|truncatechars:150 }}</p>
+                <div class="news-card-meta">
+                    <span class="news-card-author">By {{ article.author.username }}</span>
+                    <span class="news-card-date">{{ article.date }}</span>
+                </div>
+                <div class="article-actions">
+                    <button class="action-btn approve-btn" onclick="approveArticle({{ article.id }}, '{{ article.title|escapejs }}')">✓ Approve</button>
+                    <button class="action-btn reject-btn" onclick="rejectArticle({{ article.id }}, '{{ article.title|escapejs }}')">✗ Reject</button>
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <div class="no-results">
+            <span class="no-results-icon">✅</span>
+            <h2>No pending articles</h2>
+            <p>All submitted articles have been reviewed.</p>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+
+<div class="modal" id="rejectModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeRejectModal()">&times;</button>
+        <h2>Reject Article</h2>
+        <p id="rejectArticleTitle"></p>
+        <form id="rejectForm">
+            <div class="form-group">
+                <label for="rejectionReason">Reason for rejection:</label>
+                <textarea id="rejectionReason" rows="4" placeholder="Please provide a reason..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="closeRejectModal()">Cancel</button>
+                <button type="submit" class="submit-btn reject-btn">Reject Article</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: var(--text-secondary);
+}
+
+.messages {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 50px;
+    color: white;
+}
+
+.status-badge.pending {
+    background: #f59e0b;
+}
+
+.article-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.action-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.approve-btn {
+    background: #16a34a;
+    color: white;
+}
+
+.approve-btn:hover {
+    background: #15803d;
+}
+
+.reject-btn {
+    background: #dc2626;
+    color: white;
+}
+
+.reject-btn:hover {
+    background: #b91c1c;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: var(--radius);
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal h2 {
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.cancel-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--background);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.cancel-btn:hover {
+    background: var(--border-color);
+}
+</style>
+
+<script>
+let currentRejectId = null;
+
+function approveArticle(articleId, title) {
+    if (confirm(`Are you sure you want to approve "${title}"?`)) {
+        fetch(`/approve_article/${articleId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+function rejectArticle(articleId, title) {
+    currentRejectId = articleId;
+    document.getElementById('rejectArticleTitle').textContent = `Rejecting: "${title}"`;
+    document.getElementById('rejectionReason').value = '';
+    document.getElementById('rejectModal').classList.add('show');
+}
+
+function closeRejectModal() {
+    document.getElementById('rejectModal').classList.remove('show');
+    currentRejectId = null;
+}
+
+document.getElementById('rejectForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const reason = document.getElementById('rejectionReason').value;
+    
+    if (!reason.trim()) {
+        alert('Please provide a reason for rejection.');
+        return;
+    }
+    
+    fetch(`/reject_article/${currentRejectId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

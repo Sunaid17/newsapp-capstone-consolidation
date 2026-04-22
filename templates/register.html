@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - NewsHub{% endblock %}
+
+{% block content %}
+<main class="auth-container">
+    <div class="auth-card">
+        <h2>Create Your Account</h2>
+        <p class="auth-subtitle">Join NewsHub as a Reader, Journalist, or Editor</p>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{% url 'register' %}" class="auth-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username <span class="required">*</span></label>
+                <input type="text" id="username" name="username" required placeholder="Choose a username" 
+                       pattern="[a-zA-Z0-9_]+" title="Letters, numbers, and underscores only">
+            </div>
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="password1">Password <span class="required">*</span></label>
+                <input type="password" id="password1" name="password1" required placeholder="Create a password (min 8 characters)" minlength="8">
+            </div>
+            <div class="form-group">
+                <label for="password2">Confirm Password <span class="required">*</span></label>
+                <input type="password" id="password2" name="password2" required placeholder="Confirm your password">
+            </div>
+            <div class="form-group">
+                <label for="role">I want to join as: <span class="required">*</span></label>
+                <select id="role" name="role" required onchange="toggleSpecialization()">
+                    <option value="">Select your role</option>
+                    <option value="reader">📖 Reader - Browse and bookmark articles</option>
+                    <option value="journalist">✍️ Journalist - Write and submit articles</option>
+                    <option value="editor">📋 Editor - Review and approve articles</option>
+                </select>
+            </div>
+            <div class="form-group" id="specialization-group" style="display: none;">
+                <label for="specialization">Specialization (Optional)</label>
+                <input type="text" id="specialization" name="specialization" 
+                       placeholder="e.g., Politics, Sports, Technology">
+            </div>
+            
+            <div class="role-info" id="role-info-reader" style="display: none;">
+                <p><strong>📖 Reader:</strong> Browse news articles, bookmark favorites, and stay informed.</p>
+            </div>
+            <div class="role-info" id="role-info-journalist" style="display: none;">
+                <p><strong>✍️ Journalist:</strong> Write and submit articles for editorial review. Your articles will be published after approval.</p>
+            </div>
+            <div class="role-info" id="role-info-editor" style="display: none;">
+                <p><strong>📋 Editor:</strong> Review, approve, or reject submitted articles. Manage content quality.</p>
+            </div>
+            
+            <button type="submit" class="submit-btn">Create Account</button>
+        </form>
+        
+        <p class="auth-link">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    </div>
+</main>
+
+<style>
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+    padding: 2rem;
+}
+
+.auth-card {
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    max-width: 500px;
+    width: 100%;
+}
+
+.auth-card h2 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.messages {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.alert-info {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.auth-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.required {
+    color: #dc2626;
+}
+
+.auth-form input,
+.auth-form select {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: var(--transition);
+}
+
+.auth-form input::placeholder {
+    color: #94a3b8;
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.role-info {
+    background: var(--background);
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.role-info p {
+    margin: 0;
+}
+
+.auth-form .submit-btn {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.auth-form .submit-btn:hover {
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #1e40af 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.auth-form .submit-btn:active {
+    transform: translateY(0);
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.auth-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<script>
+function toggleSpecialization() {
+    const role = document.getElementById('role').value;
+    const specGroup = document.getElementById('specialization-group');
+    const readerInfo = document.getElementById('role-info-reader');
+    const journalistInfo = document.getElementById('role-info-journalist');
+    const editorInfo = document.getElementById('role-info-editor');
+    
+    specGroup.style.display = 'none';
+    readerInfo.style.display = 'none';
+    journalistInfo.style.display = 'none';
+    editorInfo.style.display = 'none';
+    
+    if (role === 'journalist') {
+        specGroup.style.display = 'block';
+        journalistInfo.style.display = 'block';
+    } else if (role === 'reader') {
+        readerInfo.style.display = 'block';
+    } else if (role === 'editor') {
+        editorInfo.style.display = 'block';
+    }
+}
+</script>
+{% endblock %}

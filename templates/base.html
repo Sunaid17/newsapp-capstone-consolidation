@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NewsHub - Your News Platform{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">📰</span>
+                <h1>NewsHub</h1>
+            </div>
+            <nav class="nav-menu">
+                <a href="{% url 'home' %}" class="nav-btn">Home</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'bookmarks' %}" class="nav-btn">Bookmarks</a>
+                    {% if user.role == 'journalist' %}
+                        <a href="{% url 'my_articles' %}" class="nav-btn">My Articles</a>
+                        <a href="{% url 'my_newsletters' %}" class="nav-btn">Newsletters</a>
+                        <a href="{% url 'create_article' %}" class="nav-btn">+ Add News</a>
+                    {% endif %}
+                    {% if user.role == 'editor' %}
+                        <a href="{% url 'pending_articles' %}" class="nav-btn editor-nav">Pending Review</a>
+                        <a href="{% url 'manage_categories' %}" class="nav-btn">Categories</a>
+                    {% endif %}
+                    {% if user.role == 'admin' %}
+                        <a href="{% url 'create_article' %}" class="nav-btn">+ Add News</a>
+                        <a href="{% url 'pending_articles' %}" class="nav-btn editor-nav">Pending Review</a>
+                        <a href="{% url 'manage_categories' %}" class="nav-btn">Categories</a>
+                    {% endif %}
+                    <span class="welcome-text">
+                        <strong>{{ user.username }}</strong>
+                        <span class="role-badge role-{{ user.role }}">{{ user.get_role_display }}</span>
+                    </span>
+                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-btn">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-btn">Login</a>
+                    <a href="{% url 'register' %}" class="nav-btn">Register</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer">
+        <p>&copy; 2025 NewsHub. All rights reserved.</p>
+    </footer>
+
+    <script src="{% static 'app.js' %}"></script>
+</body>
+</html>
+
+<style>
+.role-badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 50px;
+    margin-left: 0.5rem;
+    font-weight: 600;
+}
+
+.role-badge.role-reader {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.role-badge.role-journalist {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.role-badge.role-editor {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.role-badge.role-admin {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.editor-nav {
+    background: #fef3c7;
+    color: #d97706;
+}
+</style>

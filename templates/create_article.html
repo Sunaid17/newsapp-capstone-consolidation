@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Article - NewsHub{% endblock %}
+
+{% block content %}
+<main class="main-content">
+    <div class="create-article-container">
+        <h2>Create New Article</h2>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form id="createArticleForm" class="create-article-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="articleTitle">Title</label>
+                <input type="text" id="articleTitle" name="title" required placeholder="Enter article title" maxlength="200">
+            </div>
+            <div class="form-group">
+                <label for="articleCategory">Category</label>
+                <select id="articleCategory" name="category" required>
+                    <option value="">Select category</option>
+                    {% for category in categories %}
+                    <option value="{{ category.name }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="articleImage">Image URL (optional)</label>
+                <input type="url" id="articleImage" name="image" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="form-group">
+                <label for="articleContent">Content</label>
+                <textarea id="articleContent" name="content" rows="12" required placeholder="Write your article content here..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Publish Article</button>
+                <a href="{% url 'my_articles' %}" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+<style>
+.create-article-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.create-article-container h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.messages {
+    margin-bottom: 1rem;
+}
+
+.alert {
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.create-article-form .form-group {
+    margin-bottom: 1.25rem;
+}
+
+.create-article-form label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.create-article-form input,
+.create-article-form select,
+.create-article-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: var(--transition);
+    background: var(--surface);
+}
+
+.create-article-form input:focus,
+.create-article-form select:focus,
+.create-article-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.create-article-form textarea {
+    resize: vertical;
+    min-height: 250px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.form-actions .submit-btn {
+    flex: 1;
+    padding: 0.875rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.form-actions .submit-btn:hover {
+    background: var(--primary-hover);
+}
+
+.form-actions .cancel-btn {
+    padding: 0.875rem 1.5rem;
+    background: var(--background);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.form-actions .cancel-btn:hover {
+    background: var(--border-color);
+}
+</style>
+{% endblock %}
